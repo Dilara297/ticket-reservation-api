@@ -2,10 +2,14 @@ import redis
 from django.db import transaction
 from django.http import JsonResponse
 from .models import Koltuk, Rezervasyon
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 # Redis bağlantısını kuruyoruz
 redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def koltuk_rezerve_et(request, koltuk_id):
     kilit_anahtari = f"koltuk_kilit_{koltuk_id}"
 
@@ -33,6 +37,7 @@ def koltuk_rezerve_et(request, koltuk_id):
             # Veritabanında koltuk_durumu'nu bilerek False YAPMIYORUZ.
             # Sadece rezervasyon (sepet) kaydını oluşturuyoruz.
             Rezervasyon.objects.create(
+                user=request.user,
                 koltuk=koltuk,
                 rezervasyon_durumu='beklemede'
             )
@@ -42,7 +47,8 @@ def koltuk_rezerve_et(request, koltuk_id):
         except Koltuk.DoesNotExist:
             return JsonResponse({'hata': 'Böyle bir koltuk bulunamadı.'}, status=404)
         
-        
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def satin_al(request, koltuk_id):
     kilit_anahtari = f"koltuk_kilit_{koltuk_id}"
 

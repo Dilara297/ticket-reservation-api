@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Sefer(models.Model):
     kalkis_yeri = models.CharField(max_length=100)
@@ -26,6 +27,7 @@ class Rezervasyon(models.Model):
         ('iptal', 'İptal Edildi / Süresi Doldu')
     ]
 
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rezervasyonlar', null=True, blank=True)
     koltuk = models.ForeignKey(Koltuk, on_delete=models.CASCADE, related_name='rezervasyonlar')
     rezervasyon_durumu = models.CharField(max_length=20, choices=DURUM_SECENEKLERI, default='beklemede')
     olusturulma_tarihi = models.DateTimeField(auto_now_add=True)
