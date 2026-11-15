@@ -82,3 +82,20 @@ def satin_al(request, koltuk_id):
 
         except Koltuk.DoesNotExist:
             return JsonResponse({'hata': 'Böyle bir koltuk bulunamadı.'}, status=404)
+        
+        
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def biletlerim(request):
+    # Veritabanında sadece isteği atan kullanıcıya (request.user) ait olan rezervasyonları filtreliyoruz
+    rezervasyonlar = Rezervasyon.objects.filter(user=request.user)
+    
+    bilet_listesi = []
+    for rez in rezervasyonlar:
+        bilet_listesi.append({
+            'rezervasyon_id': rez.id,
+            'koltuk_no': rez.koltuk.koltuk_no,
+            'durum': rez.rezervasyon_durumu
+        })
+        
+    return JsonResponse({'biletlerim': bilet_listesi})
